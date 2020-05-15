@@ -41,11 +41,28 @@ class App extends React.Component  {
 		 		bottomRow: 0
 		 	},
 		 	route: 'signin', //to track where we are on the page
-		 	isSignedIn: false
+		 	isSignedIn: false,
+		 	
+		 	user:{ //uer profile
+		 		email: '',
+		 		id: '',
+				name: '',
+				entries: 0, //number of photoes submitted
+				joined: ''
+		 	}
 		}
 	}
 
-
+loadUser = (data) => {
+	this.setState({user: {
+		email: data.email,
+ 		id: data.id,
+		name: data.name,
+		entries: data.entries,
+		joined: data.joined		
+		
+	}})
+}
  calculateFaceLocation = (data) => {
  	const clarifaiFace = data.outputs[0].data.regions[0].region_info.bounding_box;
  	const image = document.getElementById('inputImage');
@@ -76,6 +93,18 @@ class App extends React.Component  {
 
   	app.models.predict(Clarifai.FACE_DETECT_MODEL, this.state.input)  //using imageUrl throws an error becuz of teh way setState works.
         .then(response => {
+        	if (response) {
+        		fetch('http://localhost:3001/image',{
+			method:'put',
+			headers: {'Content-type' : 'application/json'},
+			body: JSON.stringify({
+				id: this.state.user.id
+			})
+		}).then(response => response.json())
+        		.then(count => {
+        			this.setState(Object.assign(this.state.user, {entries:count}))
+        		})
+        }
         	this.displayFaceBox( this.calculateFaceLocation(response) );
         })
         .catch(err => console.log(err));
@@ -102,14 +131,14 @@ render() {
       { this.state.route === 'home' 
 	      ? <div>
 		      <Logo />
-		      <Rank />
+		      <Rank name={this.state.user.name} entries={this.state.user.entries}/>
 		      <ImageLinkForm  onInputChange={this.onInputChange} onButtonSubmit={this.onButtonSubmit}/>
 		      <FaceRecognition box={this.state.box} imageUrl={this.state.imageUrl} /> 
 		    </div>  
 	      : (
 	      	this.state.route ==='signin' 
-	      	? <Signin onRouteChange={this.onRouteChange}/> //we're defining not calling teh fct here, so that it execute only on click, and not on rendering
-	       	: <Register onRouteChange={this.onRouteChange}/>
+	      	? <Signin loadUser= {this.loadUser} onRouteChange={this.onRouteChange}/> //we're defining not calling the fct here, so that it execute only on click, and not on rendering
+	       	: <Register loadUser= {this.loadUser} onRouteChange={this.onRouteChange}/>
 	  		)
 	  }
       
