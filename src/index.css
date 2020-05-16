@@ -2,7 +2,7 @@ body {
   margin: 0;
   font-family: "Courrier New", Courier, monospace,
     sans-serif;
- background-image: linear-gradient(to left, #bdc3c7 0%, #2c3e50 100%);
+ background-image: linear-gradient(to left, #f270f2 0%, #a70ee9 50%, #45c5fc 100%);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
